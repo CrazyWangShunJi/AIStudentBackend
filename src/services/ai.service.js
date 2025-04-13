@@ -1,7 +1,8 @@
 // src/services/ai.service.js
 import OpenAI from "openai";
+import { prompt } from '../utils/chTips.js';
 
-const systemPrompt = '你是一名经验丰富的教师，请分析这张试卷：1.逐题解析并给出答案 2.指出学生的错误并给出改进建议 3.使用简洁清晰的教学语言';
+const systemPrompt = prompt;
 
 let openaiInstance = null;
 
@@ -21,6 +22,7 @@ export async function aiService(base64Str) {
     if (!/^data:image\/(png|jpe?g|webp);base64,([A-Za-z0-9+/=]+)$/i.test(base64Str)) {
       throw new Error('无效的Base64格式，示例：data:image/png;base64,iVBORw0KGgo...');
     }
+    console.log('发起ai调用')
     const completion = await openai.chat.completions.create({
       model: "qwen-vl-max-latest",
       messages: [
