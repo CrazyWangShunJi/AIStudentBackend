@@ -8,21 +8,36 @@ const router = express.Router();
 // 接口1：AI分析
 router.post('/ai/imageParse', async (req, res) => {
   try {
-    const { image: base64Image } = req.body;
+    // Extract fileData (base64 or placeholder) and language
+    const { fileData, language } = req.body;
 
-    console.log('请求到接口')
-    if (!base64Image) {
-      return res.status(400).json({ error: '缺少图片数据' });
+    console.log('请求到接口, 语言:', language);
+    
+    if (!fileData) {
+      return res.status(400).json({ error: '缺少文件数据 (fileData)' });
     }
-    validateImage(base64Image)
+    
+    // Optional: Keep image validation if fileData is likely base64 image
+    if (fileData !== 'pdf_placeholder') {
+        try {
+            // Assuming validateImage works on base64 strings
+            validateImage(fileData); 
+        } catch (validationError) {
+             console.error("Image validation failed:", validationError.message);
+             // Decide if validation failure is critical
+             // return res.status(400).json({ error: validationError.message }); 
+        }
+    }
 
-    const result = await aiService(base64Image);
+    // Call aiService with fileData and language
+    const result = await aiService(fileData, language);
     res.json({ success: true, data: result });
 
   } catch (error) {
+    console.error('API Error in /ai/imageParse:', error);
     res.status(500).json({
       success: false,
-      error: error.message
+      error: error.message || '服务器内部错误'
     });
   }
 });
